@@ -1,0 +1,32 @@
+import { Country } from "./types";
+
+export const EU_Countries: Country[] = [
+    { code: 'SE', name: 'Sweden' },
+    { code: 'NO', name: 'Norway' },
+    { code: 'DK', name: 'Denmark' },
+    { code: 'FI', name: 'Finland' },
+    { code: 'DE', name: 'Germany' },
+    { code: 'FR', name: 'France' },
+    { code: 'IT', name: 'Italy' },
+    { code: 'ES', name: 'Spain' },
+    { code: 'PL', name: 'Poland' },
+    { code: 'NL', name: 'Netherlands' },
+    { code: 'BE', name: 'Belgium' },
+    { code: 'AT', name: 'Austria' },
+    { code: 'PT', name: 'Portugal' },
+    { code: 'CZ', name: 'Czech Republic' },
+    { code: 'GR', name: 'Greece' },
+    { code: 'RO', name: 'Romania' },
+    { code: 'HU', name: 'Hungary' },
+    { code: 'IE', name: 'Ireland' },
+    { code: 'HR', name: 'Croatia' },
+    { code: 'SK', name: 'Slovakia' },
+    { code: 'SI', name: 'Slovenia' },
+    { code: 'BG', name: 'Bulgaria' },
+    { code: 'LT', name: 'Lithuania' },
+    { code: 'LV', name: 'Latvia' },
+    { code: 'EE', name: 'Estonia' },
+    { code: 'CY', name: 'Cyprus' },
+    { code: 'LU', name: 'Luxembourg' },
+    { code: 'MT', name: 'Malta' }
+]
