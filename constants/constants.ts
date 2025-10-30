@@ -1,4 +1,4 @@
-import { Country } from "./types/types";
+import { Country } from "../types/types";
 
 export const EU_Countries: Country[] = [
     { code: 'SE', name: 'Sweden' },
