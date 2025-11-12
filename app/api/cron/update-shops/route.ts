@@ -1,0 +1,83 @@
+import { NextResponse } from 'next/server';
+import { processCountry } from '@/lib/services/updateAgent';
+
+export const maxDuration = 300;
+
+const ALL_EU_COUNTRIES = [
+  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR',
+  'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL',
+  'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'
+];
+
+function getDailyCountries(): string[] {
+  const dayOfWeek = new Date().getDay();
+  const countriesPerDay = 4;
+  const startIndex = dayOfWeek * countriesPerDay;
+  return ALL_EU_COUNTRIES.slice(startIndex, startIndex + countriesPerDay);
+}
+
+export async function GET(request: Request) {
+  try {
+    const authHeader = request.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    console.log('🤖 Starting daily update...');
+
+    const DAILY_COUNTRIES = getDailyCountries();
+    console.log(`Today's countries: ${DAILY_COUNTRIES.join(', ')}`);
+
+    const results = [];
+    
+    for (const countryCode of DAILY_COUNTRIES) {
+      try {
+        console.log(`Processing ${countryCode}...`);
+        
+        const result = await processCountry(countryCode, {
+          updateOldShops: true,
+          maxShops: 50,
+        });
+        
+        results.push(result);
+        
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+      } catch (error) {
+        console.error(`Failed to process ${countryCode}:`, error);
+        results.push({
+          country: countryCode,
+          newShops: 0,
+          updatedShops: 0,
+          skippedShops: 0,
+          errors: [{ shop: countryCode, error: String(error) }],
+          duration: 0,
+        });
+      }
+    }
+
+    const summary = results.reduce(
+      (acc, r) => ({
+        newShops: acc.newShops + r.newShops,
+        updatedShops: acc.updatedShops + r.updatedShops,
+        skippedShops: acc.skippedShops + r.skippedShops,
+      }),
+      { newShops: 0, updatedShops: 0, skippedShops: 0 }
+    );
+
+    console.log('✅ Daily update complete:', summary);
+
+    return NextResponse.json({
+      success: true,
+      summary,
+      results,
+    });
+
+  } catch (error) {
+    console.error('Cron job error:', error);
+    return NextResponse.json(
+      { error: 'Cron job failed', details: String(error) },
+      { status: 500 }
+    );
+  }
+}
