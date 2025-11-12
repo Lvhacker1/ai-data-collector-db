@@ -35,7 +35,7 @@ export function filterShops(shops: MotorcycleShop[], filters: FilterOptions): Mo
     const term = filters.searchTerm.toLowerCase();
     filtered = filtered.filter(shop =>
       shop.name.toLowerCase().includes(term) ||
-      shop.address?.toLowerCase().includes(term) ||
+      shop.street_address?.toLowerCase().includes(term) ||
       shop.city?.toLowerCase().includes(term)
     );
   }
