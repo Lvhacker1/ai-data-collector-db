@@ -46,7 +46,7 @@ export async function getAllShops(): Promise<MotorcycleShop[]> {
   const { data, error } = await supabaseAdmin
     .from('repair_shops')
     .select('*')
-    .order('rating', { ascending: false, nullsLast: true });
+    .order('rating', { ascending: false });
 
   if (error) {
     console.error('Error fetching shops:', error);
@@ -63,7 +63,7 @@ export async function getShopsByCountry(
     .from('repair_shops')
     .select('*')
     .eq('country_code', countryCode)
-    .order('rating', { ascending: false, nullsLast: true });
+    .order('rating', { ascending: false });
 
   if (error) {
     console.error('Error fetching shops:', error);
