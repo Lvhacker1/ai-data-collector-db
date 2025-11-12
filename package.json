@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint",
+    "check-db": "tsx scripts/checkDb.ts",
+    "scrape": "tsx scripts/scrape.ts",
+    "agent": "tsx scripts/runAgent.ts",
+    "agent:all": "tsx scripts/runAgent.ts -- --all-eu",
+    "agent:update": "tsx scripts/runAgent.ts -- --update"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.76.1",
@@ -23,6 +28,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.1",
     "tailwindcss": "^4",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }

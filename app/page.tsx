@@ -1,63 +1,142 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useMemo } from 'react';
+import { useShops, useShopStats } from '@/lib/hooks/useShops';
+import { filterShops, sortShops, FilterOptions, SortOption } from '@/lib/utils/shopUtils';
+import { UI_TEXT, ICONS } from '@/lib/constants/config';
+import { ShopCard } from '@/components/ShopCard';
+import { FilterBar } from '@/components/FilterBar';
+import { StatsBar } from '@/components/StatsBar';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+  const { shops, loading, error, refetch } = useShops();
+  const { stats } = useShopStats();
+  
+  const [filters, setFilters] = useState<FilterOptions>({});
+  const [sortBy, setSortBy] = useState<SortOption>('rating');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredAndSortedShops = useMemo(() => {
+    const filtersWithSearch = { ...filters, searchTerm };
+    const filtered = filterShops(shops, filtersWithSearch);
+    return sortShops(filtered, sortBy);
+  }, [shops, filters, sortBy, searchTerm]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <LoadingSpinner message={UI_TEXT.loading.message} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">{error}</p>
+          <button
+            onClick={refetch}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Try Again
+          </button>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-900">
+      <header className="bg-gray-800 shadow-lg border-b border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                  {ICONS.motorcycle} {UI_TEXT.header.title}
+                </h1>
+                <p className="text-gray-400 mt-1">
+                  {UI_TEXT.header.subtitle}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={refetch}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                >
+                  {ICONS.refresh} Refresh
+                </button>
+              </div>
+            </div>
+
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search shops by name, city, or address..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-6 py-4 bg-gray-700 text-white placeholder-gray-400 rounded-lg border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+              />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                🔍
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <StatsBar stats={stats} />
+        
+        <FilterBar 
+          filters={filters} 
+          setFilters={setFilters}
+          allShops={shops}
+        />
+
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-white">
+              {filteredAndSortedShops.length} shops found
+            </h2>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="rating">Sort by Rating</option>
+              <option value="name">Sort by Name</option>
+              <option value="country">Sort by Country</option>
+            </select>
+          </div>
+
+          {filteredAndSortedShops.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredAndSortedShops.map((shop) => (
+                <ShopCard key={shop.id} shop={shop} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-800 rounded-lg border border-gray-700">
+              <p className="text-gray-400 text-lg mb-2">No shops found</p>
+              {searchTerm && (
+                <p className="text-gray-500 text-sm mb-4">
+                  No results for "{searchTerm}"
+                </p>
+              )}
+              <button
+                onClick={() => {
+                  setFilters({});
+                  setSearchTerm('');
+                }}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Clear All Filters
+              </button>
+            </div>
+          )}
         </div>
       </main>
     </div>
