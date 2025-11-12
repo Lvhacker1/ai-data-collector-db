@@ -4,30 +4,18 @@ import { processCountry } from '@/lib/services/updateAgent';
 export const maxDuration = 300;
 
 const ALL_EU_COUNTRIES = [
-  'AT', 'BE', 'BG', 'HR',      
-  'CY', 'CZ', 'DK', 'EE',      
-  'FI', 'FR', 'DE', 'GR',     
-  'HU', 'IE', 'IT', 'LV',      
-  'LT', 'LU', 'MT', 'NL',    
-  'PL', 'PT', 'RO', 'SK',      
-  'SI', 'ES', 'SE'             
+  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU',  
+  'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'  
 ];
 
 function getCountriesForCurrentBatch(): string[] {
   const hour = new Date().getUTCHours();
   
-  let batchIndex = 0;
-  if (hour >= 3 && hour < 6) batchIndex = 1;
-  else if (hour >= 6 && hour < 9) batchIndex = 2;
-  else if (hour >= 9 && hour < 12) batchIndex = 3;
-  else if (hour >= 12 && hour < 15) batchIndex = 4;
-  else if (hour >= 15 && hour < 18) batchIndex = 5;
-  else if (hour >= 18) batchIndex = 6;
-  
-  const startIndex = batchIndex * 4;
-  const endIndex = batchIndex === 6 ? ALL_EU_COUNTRIES.length : startIndex + 4;
-  
-  return ALL_EU_COUNTRIES.slice(startIndex, endIndex);
+  if (hour >= 3 && hour < 15) {
+    return ALL_EU_COUNTRIES.slice(0, 13);
+  } else {
+    return ALL_EU_COUNTRIES.slice(13);
+  }
 }
 
 export async function GET(request: Request) {
@@ -50,7 +38,7 @@ export async function GET(request: Request) {
         
         const result = await processCountry(countryCode, {
           updateOldShops: true,
-          maxShops: 50,
+          maxShops: 30,
         });
         
         results.push(result);
