@@ -4,16 +4,30 @@ import { processCountry } from '@/lib/services/updateAgent';
 export const maxDuration = 300;
 
 const ALL_EU_COUNTRIES = [
-  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR',
-  'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL',
-  'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'
+  'AT', 'BE', 'BG', 'HR',      
+  'CY', 'CZ', 'DK', 'EE',      
+  'FI', 'FR', 'DE', 'GR',     
+  'HU', 'IE', 'IT', 'LV',      
+  'LT', 'LU', 'MT', 'NL',    
+  'PL', 'PT', 'RO', 'SK',      
+  'SI', 'ES', 'SE'             
 ];
 
-function getDailyCountries(): string[] {
-  const dayOfWeek = new Date().getDay();
-  const countriesPerDay = 4;
-  const startIndex = dayOfWeek * countriesPerDay;
-  return ALL_EU_COUNTRIES.slice(startIndex, startIndex + countriesPerDay);
+function getCountriesForCurrentBatch(): string[] {
+  const hour = new Date().getUTCHours();
+  
+  let batchIndex = 0;
+  if (hour >= 3 && hour < 6) batchIndex = 1;
+  else if (hour >= 6 && hour < 9) batchIndex = 2;
+  else if (hour >= 9 && hour < 12) batchIndex = 3;
+  else if (hour >= 12 && hour < 15) batchIndex = 4;
+  else if (hour >= 15 && hour < 18) batchIndex = 5;
+  else if (hour >= 18) batchIndex = 6;
+  
+  const startIndex = batchIndex * 4;
+  const endIndex = batchIndex === 6 ? ALL_EU_COUNTRIES.length : startIndex + 4;
+  
+  return ALL_EU_COUNTRIES.slice(startIndex, endIndex);
 }
 
 export async function GET(request: Request) {
@@ -23,10 +37,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('🤖 Starting daily update...');
+    console.log('🤖 Starting batch update...');
 
-    const DAILY_COUNTRIES = getDailyCountries();
-    console.log(`Today's countries: ${DAILY_COUNTRIES.join(', ')}`);
+    const DAILY_COUNTRIES = getCountriesForCurrentBatch();
+    console.log(`Current batch countries: ${DAILY_COUNTRIES.join(', ')}`);
 
     const results = [];
     
